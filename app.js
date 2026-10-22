@@ -24,12 +24,25 @@ let barrios = [];          // [{nombre, slug, ...props, capa}]
 let porSlug = new Map();
 let elegido = null;
 let contorno = null;
-const existencia = new Map(); // ruta → Promise<boolean>
+const existencia = new Map(); // ruta → true (solo se guardan los aciertos)
 let pintado = 0;               // turno de pintarBotones: solo pinta el último
 
 // ---------- Mapa ----------
 
-const [[sur, oeste], [norte, este]] = await (await fetch("datos/limites.json")).json();
+async function cargarJson(ruta) {
+  try {
+    const r = await fetch(ruta);
+    if (!r.ok) throw new Error(`${ruta}: ${r.status}`);
+    return await r.json();
+  } catch (e) {
+    console.error(e);
+    const bajada = document.querySelector("#hoja-inicio .bajada");
+    if (bajada) bajada.textContent = "No se pudo cargar el mapa. Revisa tu conexión y recarga la página.";
+    throw e;
+  }
+}
+
+const [[sur, oeste], [norte, este]] = await cargarJson("datos/limites.json");
 const limites = L.latLngBounds([sur, oeste], [norte, este]);
 
 const mapa = L.map("mapa", {
@@ -53,7 +66,7 @@ L.tileLayer("teselas/{z}/{x}/{y}.jpg", {
   bounds: limites,
 }).addTo(mapa);
 
-const geo = await (await fetch("datos/barrios.geojson")).json();
+const geo = await cargarJson("datos/barrios.geojson");
 
 L.geoJSON(geo, {
   style: () => ({
@@ -94,14 +107,19 @@ function encuadrar(barrio) {
   });
 }
 
-function existe(ruta) {
-  if (!existencia.has(ruta)) {
-    existencia.set(
-      ruta,
-      fetch(ruta, { method: "HEAD" }).then((r) => r.ok, () => false),
-    );
+// "si" | "no" (404 limpio) | "error" (la petición falló: red). Solo "si" se recuerda.
+async function existe(ruta) {
+  if (existencia.has(ruta)) return "si";
+  try {
+    const r = await fetch(ruta, { method: "HEAD" });
+    if (r.ok) {
+      existencia.set(ruta, true);
+      return "si";
+    }
+    return "no";
+  } catch {
+    return "error";
   }
-  return existencia.get(ruta);
 }
 
 async function pintarBotones(barrio) {
@@ -110,17 +128,24 @@ async function pintarBotones(barrio) {
   botones.setAttribute("aria-busy", "true");
   const rutas = [barrio.color_pdf, barrio.colorear_pdf, barrio.vista].filter(Boolean);
   const hay = new Set();
-  await Promise.all(rutas.map(async (r) => { if (await existe(r)) hay.add(r); }));
+  const fallos = [];
+  await Promise.all(rutas.map(async (r) => {
+    const estado = await existe(r);
+    if (estado === "si") hay.add(r);
+    else if (estado === "error") fallos.push(r);
+    else console.warn("Falta archivo de tarjeta:", r);
+  }));
   if (turno !== pintado) return; // llegó otra elección (o la misma dos veces)
   botones.removeAttribute("aria-busy");
-  for (const r of rutas) if (!hay.has(r)) console.warn("Falta archivo de tarjeta:", r);
   botones.replaceChildren();
 
   const lista = fichaBotones(barrio, (r) => hay.has(r));
   if (lista.length === 0) {
     const aviso = document.createElement("p");
     aviso.className = "aviso";
-    aviso.textContent = "La tarjeta de este barrio todavía no está lista.";
+    aviso.textContent = fallos.length === rutas.length
+      ? "No se pudo comprobar la tarjeta. Revisa tu conexión e inténtalo de nuevo."
+      : "La tarjeta de este barrio todavía no está lista.";
     botones.append(aviso);
     return;
   }

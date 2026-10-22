@@ -8,10 +8,14 @@ Sitio: https://deauveide.github.io/rodaditas-mapa/
 
 - PBOT Roldanillo (límites de barrios)
 - Esri World Imagery (imagen satelital)
-- OpenStreetMap (calles y datos de base)
+- © colaboradores de OpenStreetMap (calles y datos de base)
 - TerraLab
 - OpenMoji, licencia CC BY-SA 4.0 (íconos)
 
 ## Cómo se regenera
 
-En el repositorio del proyecto ejecutar `python-qgis.bat scripts\web.py todo`, y copiar el contenido de `web/` en este repositorio (sin la carpeta `pruebas/`).
+1. Cerrar QGIS.
+2. En el repositorio del proyecto: `python-qgis.bat scripts\web.py todo` (debe terminar con `problemas: 0`).
+3. Copiar `web/` en este repositorio sin la carpeta `pruebas/` y conservando `.git`, `.nojekyll` y este README: `robocopy web ..\rodaditas-mapa-sitio /MIR /XD .git pruebas /XF .nojekyll README.md`.
+4. `git add -A`, `git commit` y `git push` aquí.
+5. Esperar a que GitHub Pages termine de construir.
