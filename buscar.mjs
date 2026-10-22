@@ -15,25 +15,51 @@ const palabras = (texto) => {
   return n ? n.split(" ") : [];
 };
 
-const alfabetico = (a, b) => a.nombre.localeCompare(b.nombre, "es");
+/** Otros nombres del barrio: el alias y los sectores que la gente nombra dentro de él. */
+const otrosNombres = (barrio) => [barrio.alias, ...(barrio.sectores ?? [])].filter(Boolean);
+
+/** Texto para mostrar: "Chiminangos (La Asunción)" si se halló por otro nombre (`via`). */
+export function etiqueta(barrio) {
+  return barrio.via ? `${barrio.via} (${barrio.nombre})` : barrio.nombre;
+}
+
+const alfabetico = (a, b) => etiqueta(a).localeCompare(etiqueta(b), "es");
 
 /**
- * Barrios cuyo nombre contiene, para cada palabra de la consulta, una palabra que empieza por ella.
+ * Barrios cuyo nombre (o un alias o sector, que queda en `via`) contiene, para cada palabra de la
+ * consulta, una palabra que empieza por ella.
  * Primero los nombres que empiezan por la consulta; luego orden alfabético.
  */
 export function buscar(consulta, barrios, max = 6) {
   const q = normalizar(consulta);
   if (!q) return [];
   const qPalabras = q.split(" ");
+  const coincide = (texto) => {
+    const w = palabras(texto);
+    return qPalabras.every((p) => w.some((x) => x.startsWith(p)));
+  };
   const empiezan = [];
   const resto = [];
   for (const barrio of barrios) {
-    const nombre = palabras(barrio.nombre);
-    const coincide = qPalabras.every((p) => nombre.some((w) => w.startsWith(p)));
-    if (!coincide) continue;
-    (normalizar(barrio.nombre).startsWith(q) ? empiezan : resto).push(barrio);
+    let hallado = coincide(barrio.nombre) ? barrio : null;
+    let texto = barrio.nombre;
+    if (!hallado) {
+      const via = otrosNombres(barrio).find(coincide);
+      if (!via) continue;
+      hallado = { ...barrio, via };
+      texto = via;
+    }
+    (normalizar(texto).startsWith(q) ? empiezan : resto).push(hallado);
   }
   return [...empiezan.sort(alfabetico), ...resto.sort(alfabetico)].slice(0, max);
+}
+
+/** "Incluye: Chiminangos · También llamado Guachal", como en la tarjeta impresa; "" si no hay. */
+export function otrosNombresTexto(barrio) {
+  const partes = [];
+  if (barrio.sectores?.length) partes.push(`Incluye: ${barrio.sectores.join(", ")}`);
+  if (barrio.alias) partes.push(`También llamado ${barrio.alias}`);
+  return partes.join(" · ");
 }
 
 function distancia(a, b) {
@@ -53,7 +79,8 @@ function distancia(a, b) {
 }
 
 /**
- * El barrio más parecido a la consulta (distancia de edición sobre `normalizar`).
+ * El barrio más parecido a la consulta (distancia de edición sobre `normalizar`), también por sus
+ * otros nombres (queda en `via`).
  * Compara con el nombre completo y con sus finales ("la asuncion", "asuncion"),
  * para que "asumcion" encuentre "La Asunción" aunque falte el artículo.
  */
@@ -63,12 +90,14 @@ export function masParecido(consulta, barrios) {
   let mejor = null;
   let mejorDist = Infinity;
   for (const barrio of [...barrios].sort(alfabetico)) {
-    const w = palabras(barrio.nombre);
-    for (let i = 0; i < w.length; i++) {
-      const d = distancia(q, w.slice(i).join(" "));
-      if (d < mejorDist) {
-        mejorDist = d;
-        mejor = barrio;
+    for (const nombre of [barrio.nombre, ...otrosNombres(barrio)]) {
+      const w = palabras(nombre);
+      for (let i = 0; i < w.length; i++) {
+        const d = distancia(q, w.slice(i).join(" "));
+        if (d < mejorDist) {
+          mejorDist = d;
+          mejor = nombre === barrio.nombre ? barrio : { ...barrio, via: nombre };
+        }
       }
     }
   }

@@ -1,5 +1,5 @@
 // Visor: mapa, buscador, hoja del barrio y ayuda. Leaflet llega como global (vendor/leaflet).
-import { buscar, masParecido, fichaBotones } from "./buscar.mjs";
+import { buscar, masParecido, fichaBotones, etiqueta, otrosNombresTexto } from "./buscar.mjs";
 
 const L = window.L;
 const $ = (id) => document.getElementById(id);
@@ -10,6 +10,7 @@ const sinResultados = $("sin-resultados");
 const hojaInicio = $("hoja-inicio");
 const hojaBarrio = $("hoja-barrio");
 const barrioNombre = $("barrio-nombre");
+const barrioBajada = $("barrio-bajada");
 const botones = $("botones");
 const ayuda = $("ayuda");
 
@@ -179,6 +180,7 @@ function elegir(barrio, { mover = true } = {}) {
   limpiarBusqueda();
   consulta.blur();
   barrioNombre.textContent = `Barrio ${barrio.nombre}`;
+  barrioBajada.textContent = ["Roldanillo, Valle · Club Rodaditas", otrosNombresTexto(barrio)].filter(Boolean).join(" · ");
   document.title = `Barrio ${barrio.nombre} · Mapa de Roldanillo`;
   hojaInicio.hidden = true;
   hojaBarrio.hidden = false;
@@ -211,7 +213,7 @@ function limpiarBusqueda() {
 function botonPlaca(barrio) {
   const b = document.createElement("button");
   b.type = "button";
-  b.textContent = barrio.nombre;
+  b.textContent = etiqueta(barrio);
   b.addEventListener("click", () => elegir(porSlug.get(barrio.slug)));
   return b;
 }
