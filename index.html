@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mapa de Roldanillo · Club Rodaditas</title>
+  <meta name="description" content="Busca tu barrio de Roldanillo y descarga su tarjeta para imprimir o colorear.">
+  <meta name="theme-color" content="#fbf6ea">
+  <meta property="og:title" content="Mapa de Roldanillo · Club Rodaditas">
+  <meta property="og:description" content="Busca tu barrio y descarga su tarjeta para imprimir o colorear.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2714%27 fill=%27%23e8590c%27 stroke=%27%233a2a14%27 stroke-width=%273%27/%3E%3C/svg%3E">
+  <link rel="preload" href="fuentes/Baloo2-800.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <div id="mapa" aria-label="Mapa de los barrios de Roldanillo"></div>
+
+  <header class="arriba">
+    <form class="buscador" role="search" autocomplete="off">
+      <label class="visualmente-oculto" for="consulta">Busca tu barrio</label>
+      <input id="consulta" type="search" placeholder="Busca tu barrio" enterkeyhint="search"
+             spellcheck="false" aria-controls="sugerencias" aria-autocomplete="list">
+      <button class="boton-ayuda" type="button" aria-haspopup="dialog" aria-controls="ayuda"
+              title="¿Cómo leer tu mapa?"><span aria-hidden="true">?</span><span class="visualmente-oculto">¿Cómo leer tu mapa?</span></button>
+    </form>
+    <ul id="sugerencias" class="sugerencias" role="listbox" aria-label="Barrios" hidden></ul>
+    <p id="sin-resultados" class="sin-resultados" role="status" hidden></p>
+  </header>
+
+  <div class="abajo">
+    <section id="hoja" class="hoja" aria-live="polite">
+      <div class="hoja-inicio" id="hoja-inicio">
+        <h1 class="titulo">Mapa de Roldanillo</h1>
+        <p class="bajada">Club Rodaditas. Toca tu barrio en el mapa o búscalo por su nombre.</p>
+      </div>
+      <div class="hoja-barrio" id="hoja-barrio" hidden>
+        <button class="cerrar" type="button" id="cerrar-hoja"><span aria-hidden="true">×</span><span class="visualmente-oculto">Cerrar</span></button>
+        <h2 class="titulo" id="barrio-nombre"></h2>
+        <p class="bajada">Roldanillo, Valle · Club Rodaditas</p>
+        <div class="botones" id="botones"></div>
+      </div>
+    </section>
+    <footer class="creditos">
+      Datos: PBOT Roldanillo, Esri World Imagery, OpenStreetMap, TerraLab.
+      Pictogramas: OpenMoji (CC BY-SA 4.0). Mapa con Leaflet.
+    </footer>
+  </div>
+
+  <dialog id="ayuda" class="ayuda" aria-labelledby="ayuda-titulo">
+    <div class="ayuda-cuerpo">
+      <form method="dialog"><button class="cerrar" type="submit"><span aria-hidden="true">×</span><span class="visualmente-oculto">Cerrar la ayuda</span></button></form>
+      <h2 id="ayuda-titulo" class="titulo">¿Cómo leer tu mapa?</h2>
+      <p class="bajada">Club Rodaditas · Roldanillo</p>
+      <ol class="pasos">
+        <li>Busca tu barrio en el mapa y descarga su tarjeta.</li>
+        <li>Encuentra tu calle: mira las placas <span class="placa">azules</span>.</li>
+        <li>Dibuja tu casa con una ⭐.</li>
+        <li>Traza tu camino al colegio o al parque.</li>
+        <li>Marca con 😊 los lugares que te gustan y con ⚠️ los que te dan miedo.</li>
+      </ol>
+      <p class="nota">Acerca el mapa con dos dedos para ver las placas de las calles y los dibujitos de los lugares.</p>
+      <h3 class="subtitulo">Casas, árboles y calles</h3>
+      <p class="explica">Los techos tienen su color de verdad y su sombra: más sombra, más pisos. Los árboles son nubes verdes. Las flechitas blancas dicen hacia dónde van los carros.</p>
+      <h3 class="subtitulo"><span class="subida" aria-hidden="true">‹‹</span> Subidas para la bici</h3>
+      <p class="explica">Los ‹ naranja apuntan hacia donde la calle sube. Dos ‹‹ = subida muy fuerte: ¡a pedalear duro o a empujar la bici!</p>
+      <h3 class="subtitulo">Quebradas y lugares</h3>
+      <p class="explica">La línea azul es una quebrada, como la Quebrada Roldanillo. Los dibujitos en círculo son lugares conocidos.</p>
+      <h3 class="subtitulo">Parque de tránsito</h3>
+      <p class="explica">En el Parque de la Familia hay carriles y glorietas de colores para practicar en bici.</p>
+      <h3 class="subtitulo">Lugares del barrio</h3>
+      <ul class="lugares">
+        <li><span aria-hidden="true">🏫</span> Colegio</li>
+        <li><span aria-hidden="true">⛪</span> Iglesia</li>
+        <li><span aria-hidden="true">🏥</span> Salud</li>
+        <li><span aria-hidden="true">⚽</span> Cancha o parque</li>
+        <li><span aria-hidden="true">🏛️</span> Museo</li>
+        <li><span aria-hidden="true">🏢</span> Oficina pública</li>
+        <li><span aria-hidden="true">👮</span> Policía</li>
+        <li><span aria-hidden="true">👴</span> Hogar de abuelos</li>
+      </ul>
+      <p class="medida"><span aria-hidden="true">📏</span> 100 metros ≈ 130 pasos tuyos ≈ medio minuto en bici</p>
+    </div>
+  </dialog>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
