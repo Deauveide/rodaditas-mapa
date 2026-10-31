@@ -54,18 +54,31 @@ const mapa = L.map("mapa", {
   maxBounds: limites.pad(0.4),
   maxBoundsViscosity: 0.8,
   zoomSnap: 0.25,
+  // Leaflet salta sin animación si el zoom cambia más de 4 niveles; aquí siempre se anima
+  zoomAnimationThreshold: 12,
 }).fitBounds(limites, {
   paddingTopLeft: [0, document.querySelector(".buscador").getBoundingClientRect().bottom + 8],
   paddingBottomRight: [0, document.querySelector(".abajo").offsetHeight + 8],
 });
 
-L.tileLayer("teselas/{z}/{x}/{y}.jpg", {
+const dibujo = L.tileLayer("teselas/{z}/{x}/{y}.jpg", {
   minZoom: 13,
   maxZoom: 19,
   minNativeZoom: 14,
   maxNativeZoom: 19,
   bounds: limites,
 }).addTo(mapa);
+
+// Satélite (Esri World Imagery) para validar errores del mapa dibujado
+const satelite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+  minZoom: 13,
+  maxZoom: 19,
+  maxNativeZoom: 19,
+  bounds: limites,
+  attribution: "Esri World Imagery",
+});
+
+L.control.layers({ "Mapa": dibujo, "Satélite": satelite }, null, { position: "topright" }).addTo(mapa);
 
 const geo = await cargarJson("datos/barrios.geojson");
 
@@ -98,13 +111,67 @@ function dibujarContorno(barrio) {
   ]).addTo(mapa);
 }
 
+// Sectores populares: zona aproximada (bloque donde cae el sector), solo del barrio elegido
+let sectoresGeo = { features: [] };
+try {
+  sectoresGeo = await cargarJson("datos/sectores.geojson");
+} catch {
+  // sin sectores el mapa sigue funcionando
+}
+let capaSectores = null;
+let sectorElegido = null;
+
+function estiloSector(activo) {
+  return activo
+    ? { color: "#ffffff", weight: 5, opacity: 0.95, fill: true, fillColor: "#e8590c", fillOpacity: 0.35, dashArray: null }
+    : { color: "#e8590c", weight: 2.5, opacity: 0.9, fill: true, fillColor: "#e8590c", fillOpacity: 0.12, dashArray: "6 5" };
+}
+
+function quitarSectores() {
+  if (capaSectores) capaSectores.remove();
+  capaSectores = null;
+  sectorElegido = null;
+}
+
+function mostrarSectores(barrio) {
+  quitarSectores();
+  const propios = sectoresGeo.features.filter((f) => f.properties.barrio === barrio.slug);
+  if (propios.length === 0) return;
+  const coleccion = { type: "FeatureCollection", features: propios };
+  const visibles = new Map();
+  const grupo = L.featureGroup([
+    L.geoJSON(coleccion, {
+      style: () => estiloSector(false),
+      onEachFeature: (feature, capa) => visibles.set(feature, capa),
+    }),
+    // zona de clic: borde invisible de 18 px alrededor del sector, para acertarle en vistas alejadas
+    L.geoJSON(coleccion, {
+      style: () => ({ weight: 18, opacity: 0, fill: true, fillOpacity: 0 }),
+      onEachFeature: (feature, capa) => {
+        capa.bindTooltip(feature.properties.nombre, { sticky: true });
+        capa.on("click", () => elegirSector(feature, visibles.get(feature)));
+      },
+    }),
+  ]).addTo(mapa);
+  capaSectores = grupo;
+}
+
+function elegirSector(feature, capa) {
+  if (sectorElegido) sectorElegido.setStyle(estiloSector(false));
+  sectorElegido = capa;
+  capa.setStyle(estiloSector(true));
+  barrioBajada.textContent = `Sector ${feature.properties.nombre} (zona aproximada) · Barrio ${elegido.nombre}`;
+}
+
 function encuadrar(barrio) {
   const altoHoja = document.querySelector(".abajo").offsetHeight;
   const altoArriba = document.querySelector(".buscador").getBoundingClientRect().bottom;
-  mapa.fitBounds(barrio.capa.getBounds(), {
+  // vuelo suave: el mapa se desplaza y ajusta el zoom en vez de saltar
+  mapa.flyToBounds(barrio.capa.getBounds(), {
     paddingTopLeft: [20, altoArriba + 16],
     paddingBottomRight: [20, altoHoja + 16],
     maxZoom: 18,
+    duration: 0.9,
   });
 }
 
@@ -176,6 +243,12 @@ function actualizarUrl(slug) {
 }
 
 function elegir(barrio, { mover = true } = {}) {
+  // ya estás en este barrio: un clic sobre él no vuelve a encuadrar ni borra el sector elegido
+  if (mover && elegido?.slug === barrio.slug) {
+    limpiarBusqueda();
+    consulta.blur();
+    return;
+  }
   elegido = barrio;
   limpiarBusqueda();
   consulta.blur();
@@ -185,6 +258,7 @@ function elegir(barrio, { mover = true } = {}) {
   hojaInicio.hidden = true;
   hojaBarrio.hidden = false;
   dibujarContorno(barrio);
+  mostrarSectores(barrio);
   pintarBotones(barrio);
   actualizarUrl(barrio.slug);
   if (mover) encuadrar(barrio);
@@ -193,6 +267,7 @@ function elegir(barrio, { mover = true } = {}) {
 function soltar() {
   elegido = null;
   if (contorno) { contorno.remove(); contorno = null; }
+  quitarSectores();
   hojaBarrio.hidden = true;
   hojaInicio.hidden = false;
   document.title = "Mapa de Roldanillo · Club Rodaditas";
@@ -200,6 +275,9 @@ function soltar() {
 }
 
 $("cerrar-hoja").addEventListener("click", soltar);
+$("ver-barrio").addEventListener("click", () => {
+  if (elegido) encuadrar(elegido);
+});
 
 // ---------- Buscador ----------
 
