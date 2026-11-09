@@ -10,11 +10,17 @@
   <meta property="og:description" content="Busca tu barrio y descarga su tarjeta para imprimir o colorear.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2714%27 fill=%27%23e8590c%27 stroke=%27%233a2a14%27 stroke-width=%273%27/%3E%3C/svg%3E">
   <link rel="preload" href="fuentes/Baloo2-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="estilo.css">
+  <link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css">
+  <!-- el mapa arranca antes: el código y los datos se piden de una vez -->
+  <link rel="modulepreload" href="vendor/maplibre-gl/maplibre-gl.mjs">
+  <link rel="modulepreload" href="mapa/estilo.mjs">
+  <link rel="preload" href="datos/barrios.geojson" as="fetch" crossorigin>
+  <link rel="preload" href="mapa/capas/indice.json" as="fetch" crossorigin>
+  <link rel="stylesheet" href="estilo.css?v=2026-11-09b">
 </head>
 <body>
   <div id="mapa" aria-label="Mapa de los barrios de Roldanillo"></div>
+  <p id="sin-mapa" class="sin-mapa" role="status" hidden></p>
 
   <header class="arriba">
     <form class="buscador" role="search" autocomplete="off">
@@ -44,7 +50,7 @@
     </section>
     <footer class="creditos">
       Datos: PBOT Roldanillo, Esri World Imagery, © colaboradores de OpenStreetMap, TerraLab.
-      Pictogramas: OpenMoji (CC BY-SA 4.0). Mapa con Leaflet.
+      Pictogramas: OpenMoji (CC BY-SA 4.0). Mapa con MapLibre.
     </footer>
   </div>
 
@@ -84,7 +90,6 @@
     </div>
   </dialog>
 
-  <script src="vendor/leaflet/leaflet.js"></script>
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=2026-11-09b"></script>
 </body>
 </html>
