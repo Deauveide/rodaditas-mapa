@@ -1,0 +1,207 @@
+{
+ "capas": {
+  "manzanas": {
+   "archivo": "manzanas.geojson",
+   "n": 492,
+   "bytes": 179586,
+   "bytes_gz": 36551
+  },
+  "calzada": {
+   "archivo": "calzada.geojson",
+   "n": 1,
+   "bytes": 145953,
+   "bytes_gz": 36807
+  },
+  "andenes": {
+   "archivo": "andenes.geojson",
+   "n": 492,
+   "bytes": 330912,
+   "bytes_gz": 73329
+  },
+  "destapadas": {
+   "archivo": "destapadas.geojson",
+   "n": 24,
+   "bytes": 3860,
+   "bytes_gz": 659
+  },
+  "sentido": {
+   "archivo": "sentido.geojson",
+   "n": 81,
+   "bytes": 13492,
+   "bytes_gz": 1837
+  },
+  "canadas": {
+   "archivo": "canadas.geojson",
+   "n": 215,
+   "bytes": 137572,
+   "bytes_gz": 33051
+  },
+  "pendientes": {
+   "archivo": "pendientes.geojson",
+   "n": 149,
+   "bytes": 17558,
+   "bytes_gz": 1653
+  },
+  "parques": {
+   "archivo": "parques.geojson",
+   "n": 81,
+   "bytes": 20324,
+   "bytes_gz": 3682
+  },
+  "ejes": {
+   "archivo": "ejes.geojson",
+   "n": 211,
+   "bytes": 42099,
+   "bytes_gz": 7000
+  },
+  "techos_sombra": {
+   "archivo": "techos_sombra.geojson",
+   "n": 10242,
+   "bytes": 2428926,
+   "bytes_gz": 341886
+  },
+  "techos": {
+   "archivo": "techos.geojson",
+   "n": 10242,
+   "bytes": 2787469,
+   "bytes_gz": 438222
+  },
+  "copas_sombra": {
+   "archivo": "copas_sombra.geojson",
+   "n": 3633,
+   "bytes": 1874500,
+   "bytes_gz": 321929
+  },
+  "copas": {
+   "archivo": "copas.geojson",
+   "n": 3633,
+   "bytes": 1936111,
+   "bytes_gz": 324025
+  },
+  "copas_brillo": {
+   "archivo": "copas_brillo.geojson",
+   "n": 3630,
+   "bytes": 1121469,
+   "bytes_gz": 174524
+  },
+  "referencias": {
+   "archivo": "referencias.geojson",
+   "n": 62,
+   "bytes": 28365,
+   "bytes_gz": 6235
+  },
+  "referencias_pin": {
+   "archivo": "referencias_pin.geojson",
+   "n": 60,
+   "bytes": 11944,
+   "bytes_gz": 2292
+  },
+  "barrios_rotulo": {
+   "archivo": "barrios_rotulo.geojson",
+   "n": 49,
+   "bytes": 7063,
+   "bytes_gz": 1348
+  },
+  "sectores_punto": {
+   "archivo": "sectores_punto.geojson",
+   "n": 6,
+   "bytes": 1004,
+   "bytes_gz": 342
+  }
+ },
+ "limites": [
+  [
+   4.399343,
+   -76.166783
+  ],
+  [
+   4.429972,
+   -76.13969
+  ]
+ ],
+ "iconos": [
+  "1F3C3",
+  "1F3DB",
+  "1F3DF",
+  "1F3E2",
+  "1F3E5",
+  "1F3EB",
+  "1F46E",
+  "1F474",
+  "1F68C",
+  "1FAA6",
+  "26EA"
+ ],
+ "puntos_codigo": [
+  32,
+  35,
+  40,
+  41,
+  45,
+  46,
+  48,
+  49,
+  50,
+  51,
+  52,
+  53,
+  54,
+  55,
+  56,
+  57,
+  65,
+  66,
+  67,
+  68,
+  69,
+  70,
+  71,
+  72,
+  73,
+  74,
+  75,
+  76,
+  77,
+  78,
+  79,
+  80,
+  81,
+  82,
+  83,
+  84,
+  85,
+  86,
+  89,
+  90,
+  97,
+  98,
+  99,
+  100,
+  101,
+  102,
+  103,
+  104,
+  105,
+  106,
+  107,
+  108,
+  109,
+  110,
+  111,
+  112,
+  113,
+  114,
+  115,
+  116,
+  117,
+  118,
+  121,
+  122,
+  225,
+  233,
+  237,
+  241,
+  243,
+  250
+ ]
+}

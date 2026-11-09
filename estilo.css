@@ -8,7 +8,7 @@
 
 :root {
   --crema: #fbf6ea;      /* papel de la tarjeta */
-  --suelo: #f0e6d1;      /* suelo de las teselas, fuera del casco */
+  --suelo: #f0e6d1;      /* suelo fuera del casco */
   --naranja: #e8590c;    /* títulos y contorno del barrio */
   --naranja-oscuro: #c2470a;
   --cafe: #3a2a14;       /* marco y texto */
@@ -47,8 +47,34 @@ html, body {
   inset: 0;
   background: var(--suelo);
 }
-.leaflet-container { font-family: "Nunito", system-ui, sans-serif; background: var(--suelo); }
-.leaflet-container :focus-visible { outline: none; }
+.maplibregl-map { font-family: "Nunito", system-ui, sans-serif; }
+.maplibregl-canvas:focus-visible { outline: none; }
+
+/* sin WebGL: aviso en lugar del mapa; buscador y descargas siguen */
+.sin-mapa {
+  position: fixed;
+  top: 40%; left: var(--margen); right: var(--margen);
+  margin: 0; padding: 14px 16px;
+  background: #fffaf0; border: 2px dashed var(--cafe); border-radius: 14px;
+  font-weight: 700; text-align: center;
+}
+
+/* controles del mapa bajo el buscador */
+.maplibregl-ctrl-top-right { top: calc(var(--margen) + 64px + env(safe-area-inset-top)); }
+.modos {
+  display: flex; flex-direction: column; overflow: hidden;
+  background: #fffaf0; border-radius: 14px; box-shadow: 0 2px 8px rgba(58, 42, 20, .25);
+}
+.modos button {
+  min-width: 48px; min-height: 48px; padding: 0 12px;
+  border: 0; border-bottom: 1px solid rgba(58, 42, 20, .15);
+  background: transparent; color: var(--cafe); font: 800 14px/1 "Nunito", system-ui, sans-serif;
+  cursor: pointer;
+}
+.modos button:last-child { border-bottom: 0; }
+/* gana a ".maplibregl-ctrl button:not(:disabled):hover", que en el celular queda pegado tras tocar */
+.maplibregl-ctrl.modos button[aria-pressed="true"],
+.maplibregl-ctrl.modos button[aria-pressed="true"]:not(:disabled):hover { background: #e8590c; color: #fff; }
 
 /* ---------- Buscador ---------- */
 
@@ -319,5 +345,4 @@ html, body {
 
 @media (prefers-reduced-motion: reduce) {
   .hoja-barrio:not([hidden]) { animation: none; }
-  .leaflet-zoom-anim .leaflet-zoom-animated { transition: none !important; }
 }
